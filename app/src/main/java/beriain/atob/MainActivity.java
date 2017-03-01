@@ -328,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
 			setTitle(title);
             WebView wv = (WebView) findViewById(R.id.webView);
 			if(preferences.getString("themes", "1").compareToIgnoreCase(("0")) == 0) {
-				content = "<html style='color:white;'>" + content + "</html>";
+				content = "<html><style>html{color:#cccccc;background:#444444;}a{color:#2196F3;}</style>" + content + "</html>";
 			}
             wv.loadDataWithBaseURL("", content, "text/html", "utf-8", "");
         }
