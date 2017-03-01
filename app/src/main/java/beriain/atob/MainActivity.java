@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
 						if(element.attr("type").compareToIgnoreCase("submit") == 0)
 				    		content = content + ("<input value='" + element.attr("value") + "' type='submit'/><br>");*/
 				    }
-		            else if(element.children().size() == 0 && element.text() != "")
+		            else if(element.children().size() == 0 && !element.parent().hasAttr("href"))
 		            	content = content + (element.text() + "<br>");
 		                //System.out.println(element.tagName());
                 }
