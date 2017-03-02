@@ -36,6 +36,17 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
 	SharedPreferences preferences;
+	String home = "<html><head><title>atob</title><meta charset=\"utf-8\"><meta name=\"viewport\"" +
+			"content=\"width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1\">" +
+			"<style>body{margin:0;text-align: center;font-family: sans-serif;}img{margin-top:50px;" +
+			"width:50%;}h2{margin-top:20px;}</style></head><body><img src=\"file:///android_asset/logo.png\" /><h2>atob" +
+			"</h2><h3>a text only browser</h3></body></html>";
+	String darkHome = "<html><head><title>atob</title><meta charset=\"utf-8\"><meta name=\"viewport\"" +
+			"content=\"width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1\">" +
+			"<style>html{color:#cccccc;background:#444444;}a{color:#2196F3;}body{margin:0;text-align:" +
+			"center;font-family: sans-serif;}img{margin-top:50px;width:50%;}h2{margin-top:20px;}" +
+			"</style></head><body><img src=\"file:///android_asset/logo.png\" /><h2>atob</h2><h3>a text only browser" +
+			"</h3></body></html>";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +62,6 @@ public class MainActivity extends AppCompatActivity {
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		final String searchEngine = preferences.getString("search", "1");
-		if(preferences.getString("themes", "1").compareToIgnoreCase(("0")) == 0)
-		{
-			wv.setBackgroundColor(Color.DKGRAY);
-			wv.loadUrl("javascript:document.body.style.setProperty(\"color\", \"white\");");
-		}
 
 		if(inte.getAction() == Intent.ACTION_VIEW) {
 			Loader l = new Loader();
@@ -63,7 +69,13 @@ public class MainActivity extends AppCompatActivity {
 			l.execute();
 		}
 		else {
-			wv.loadUrl("file:///android_asset/home.html");
+			//wv.loadUrl("file:///android_asset/home.html");
+			if(preferences.getString("themes", "1").compareToIgnoreCase(("1")) == 0)
+				wv.loadDataWithBaseURL("", home, "text/html", "utf-8", "");
+			else {
+				wv.setBackgroundColor(Color.DKGRAY);
+				wv.loadDataWithBaseURL("", darkHome, "text/html", "utf-8", "");
+			}
 		}
 
 		//http://data.iana.org/TLD/tlds-alpha-by-domain.txt
@@ -313,7 +325,6 @@ public class MainActivity extends AppCompatActivity {
 				    }
 		            else if(element.children().size() == 0 && !element.parent().hasAttr("href"))
 		            	content = content + (element.text() + "<br>");
-		                //System.out.println(element.tagName());
                 }
 
             } catch (IOException e) {
