@@ -23,6 +23,7 @@ import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import java.net.URL;
 import java.util.regex.Pattern;
 
 import org.jsoup.Connection;
