@@ -283,16 +283,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                /*Document doc = Jsoup.connect(url)
-                        //.userAgent("Mozilla/5.0 (Windows NT 6.1; rv:50.0) Gecko/20100101 Firefox/50.0")
-                        //.header("Accept-Language", "eu")
-						.followRedirects(true)
-						//.referrer("http://www.google.com")
-						.timeout(10000)
-                        .get();*/
 
 				Connection c = Jsoup.connect(url);
-				c.userAgent("Mozilla/5.0 (Windows NT 6.1; rv:51.0) Gecko/20100101 Firefox/51.0");
+				c.userAgent("Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0");
 				//c.header("Accept-Language", "eu");
 				c.followRedirects(true);
 				c.timeout(10000);
@@ -300,32 +293,17 @@ public class MainActivity extends AppCompatActivity {
 
 				title = doc.title();
 
-                //bytes += doc.toString().length();
 				content = getString(R.string.page_size) + ": " + humanReadableByteCount(doc.toString().length()) + "<hr>";
-				//content = "This session size: " + humanReadableByteCount(bytes) + "<hr>";
 
-                for (Element element : doc.select("body").select("*"))
-                {
-                    if(element.hasAttr("href")) {
-                        content = content + ("<a href='" + element.attr("abs:href") + "'>" + element.text() + "</a><br>");
-					}
-					else if(element.tagName().compareToIgnoreCase("input") == 0)
-				    {
-						content = content + "<input";						
-						for(Attribute att : element.attributes().asList()) {
-							content = content + " " + att.getKey() + "='" + att.getValue() + "'";
-						}
-						content = content + "</input><br>";
-				    	/*if(element.attr("type").compareToIgnoreCase("text") == 0)
-				    		content = content + ("<input type='text' /><br>");
-				    	if(element.attr("type").compareToIgnoreCase("search") == 0)
-				    		content = content + ("<input type='search'/><br>");
-						if(element.attr("type").compareToIgnoreCase("submit") == 0)
-				    		content = content + ("<input value='" + element.attr("value") + "' type='submit'/><br>");*/
-				    }
-		            else if(element.children().size() == 0 && !element.parent().hasAttr("href"))
-		            	content = content + (element.text() + "<br>");
-                }
+				content = content + doc.body().toString();
+				//make paths absolute
+				URL u = new URL(url);
+				String base = u.getProtocol() + "://" + u.getHost() + "/";
+				content = content.replaceAll("href=\"/", "href=\"" + base);
+				//remove images
+				content = content.replaceAll("<img.*?>", "");
+
+                
 
             } catch (IOException e) {
                 content = e.getMessage();
@@ -339,8 +317,15 @@ public class MainActivity extends AppCompatActivity {
 			setTitle(title);
             WebView wv = (WebView) findViewById(R.id.webView);
 			if(preferences.getString("themes", "1").compareToIgnoreCase(("0")) == 0) {
-				content = "<html><style>html{color:#cccccc;background:#444444;}a{color:#2196F3;}</style>" + content + "</html>";
+				content = "<html><head><title>atob</title><meta charset=\"utf-8\"><meta name=\"viewport\"" +
+                        "content=\"width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1\">" +
+                        "<style>html{color:#cccccc;background:#444444;}a{color:#2196F3;}</style></head>" + content + "</body></html>";
 			}
+			else {
+                content = "<html><head><title>atob</title><meta charset=\"utf-8\"><meta name=\"viewport\"" +
+                        "content=\"width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1\"></head><body>" +
+                        content + "</body></html>";
+            }
             wv.loadDataWithBaseURL("", content, "text/html", "utf-8", "");
         }
 
