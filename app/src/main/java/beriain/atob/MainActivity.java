@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity {
             try {
 
 				Connection c = Jsoup.connect(url);
-				c.userAgent("Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0");
+				c.userAgent("Mozilla/5.0 (Android 4.4; Mobile; rv:52.0) Gecko/52.0 Firefox/52.0");
 				//c.header("Accept-Language", "eu");
 				c.followRedirects(true);
 				c.timeout(10000);
