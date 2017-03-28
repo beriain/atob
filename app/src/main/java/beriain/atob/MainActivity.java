@@ -13,24 +13,28 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.widget.EditText;
 import android.text.InputType;
-import android.util.Patterns;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Attribute;
 
 import java.io.IOException;
 
@@ -48,6 +52,11 @@ public class MainActivity extends AppCompatActivity {
 			"center;font-family: sans-serif;}img{margin-top:50px;width:50%;}h2{margin-top:20px;}" +
 			"</style></head><body><img src=\"file:///android_asset/logo.png\" /><h2>atob</h2><h3>a text only browser" +
 			"</h3></body></html>";
+    ArrayList<historyEntry> history;
+
+	JavaScriptInterface jsInterface = new JavaScriptInterface();
+
+    boolean addToHistory = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +65,14 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Read history
+		history = readHistoryFromInternalStorage();
+
 		Intent inte = this.getIntent();
 
 		WebView wv = (WebView) findViewById(R.id.webView);
+        wv.getSettings().setJavaScriptEnabled(true);
+        wv.addJavascriptInterface(jsInterface, "JSInterface");
 
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		//SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -71,11 +85,15 @@ public class MainActivity extends AppCompatActivity {
 		}
 		else {
 			//wv.loadUrl("file:///android_asset/home.html");
-			if(preferences.getString("themes", "1").compareToIgnoreCase(("1")) == 0)
-				wv.loadDataWithBaseURL("", home, "text/html", "utf-8", "");
+			if(preferences.getString("themes", "1").compareToIgnoreCase(("1")) == 0) {
+                if(history.isEmpty())
+                    wv.loadDataWithBaseURL("", home, "text/html", "utf-8", "");
+                else
+                    wv.loadDataWithBaseURL("", buildHistory(), "text/html", "utf-8", "");
+            }
 			else {
-				wv.setBackgroundColor(Color.DKGRAY);
-				wv.loadDataWithBaseURL("", darkHome, "text/html", "utf-8", "");
+                    wv.setBackgroundColor(Color.DKGRAY);
+                    wv.loadDataWithBaseURL("", darkHome, "text/html", "utf-8", "");
 			}
 		}
 
@@ -265,8 +283,55 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    public String buildHistory() {
+        String h = "<html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width," +
+                "initial-scale=1, maximum-scale=1, minimum-scale=1\"><script>//handle long pressvar touchStartTime;" +
+                "document.addEventListener(\"touchstart\", function(){touchStartTime = new Date();}, false);" +
+                "document.addEventListener(\"touchend\", function(evt){if(new Date() - touchStartTime >= 1000" +
+                "&& evt.target.id != \"\") window.JSInterface.removeHistoryEntry(evt.target.id);}, false);</script>" +
+                "<style>div{color:green;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}div.date{float:right;" +
+                "color:#444444;}div.url{color:#444444;}hr{margin:8 -8px 8 -8px;}</style></head><body>" +
+                "<button style=\"width: 100%;\" onclick=\"window.JSInterface.removeAllHistory()\">Remove all</button><hr>";
+        for(int x = 0; x < history.size(); x++) {
+            h = h + "<div id='" + history.get(x).getUrl() + "' onclick='window.JSInterface.loadFromHistory(this.id)'>" +
+                    "<div id='" + history.get(x).getUrl() + "'>" + history.get(x).getTitle() +
+                    "<div id='" + history.get(x).getUrl() + "' class='date'>" + history.get(x).getDate() + "</div><br>" +
+                    "<div id='" + history.get(x).getUrl() + "' class='url'>" + history.get(x).getUrl() +
+                    "</div></div></div><hr>";
+        }
+        h = h + "</body></html>";
+        return h;
+    }
 
-    @Override
+    public ArrayList<historyEntry> readHistoryFromInternalStorage() {
+        ArrayList<historyEntry> toReturn = new ArrayList<historyEntry>();
+        FileInputStream fis;
+        try {
+            fis = this.openFileInput("history");
+            ObjectInputStream oi = new ObjectInputStream(fis);
+            toReturn = (ArrayList<historyEntry>) oi.readObject();
+            oi.close();
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        return toReturn;
+	}
+
+    public void saveHistoryToInternalStorage() {
+        try {
+            FileOutputStream fos = this.openFileOutput("history", this.MODE_PRIVATE);
+            ObjectOutputStream of = new ObjectOutputStream(fos);
+            of.writeObject(history);
+            of.flush();
+            of.close();
+            fos.close();
+        }
+        catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -328,6 +393,10 @@ public class MainActivity extends AppCompatActivity {
                         content + "</body></html>";
             }
             wv.loadDataWithBaseURL("", content, "text/html", "utf-8", "");
+            if(addToHistory)
+                history.add(new historyEntry(title, url, new Date()));
+            addToHistory = true;
+            saveHistoryToInternalStorage();
         }
 
 		public String humanReadableByteCount(long bytes) {
@@ -376,4 +445,28 @@ public class MainActivity extends AppCompatActivity {
 			wv.loadUrl(intent.getExtras().getString("url"));
 		}
 	}
+
+    public class JavaScriptInterface {
+        @JavascriptInterface
+        public void removeAllHistory(){
+            history.clear();
+            saveHistoryToInternalStorage();
+            Toast.makeText(getBaseContext(), "history cleared", Toast.LENGTH_SHORT).show();
+            finish();
+            startActivity(getIntent());
+        }
+
+        @JavascriptInterface
+        public void loadFromHistory(String u) {
+            Loader l = new Loader();
+            l.url = u;
+            l.execute();
+            addToHistory = false;
+        }
+
+        @JavascriptInterface
+        public void removeHistoryEntry(String u) {
+
+        }
+    }
 }
