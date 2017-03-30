@@ -292,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
                 "<style>div{color:green;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}div.date{float:right;" +
                 "color:#444444;}div.url{color:#444444;}hr{margin:8 -8px 8 -8px;}</style></head><body>" +
                 "<button style=\"width: 100%;\" onclick=\"window.JSInterface.removeAllHistory()\">Remove all</button><hr>";
-        for(int x = 0; x < history.size(); x++) {
+        for(int x = history.size()-1; x > 0; x--) {
             h = h + "<div id='" + history.get(x).getUrl() + "' onclick='window.JSInterface.loadFromHistory(this.id)'>" +
                     "<div id='" + history.get(x).getUrl() + "'>" + history.get(x).getTitle() +
                     "<div id='" + history.get(x).getUrl() + "' class='date'>" + history.get(x).getDate() + "</div><br>" +
