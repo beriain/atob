@@ -449,11 +449,22 @@ public class MainActivity extends AppCompatActivity {
     public class JavaScriptInterface {
         @JavascriptInterface
         public void removeAllHistory(){
-            history.clear();
-            saveHistoryToInternalStorage();
-            Toast.makeText(getBaseContext(), "history cleared", Toast.LENGTH_SHORT).show();
-            finish();
-            startActivity(getIntent());
+            new AlertDialog.Builder(MainActivity.this)
+                    .setTitle("Remove all history")
+                    .setMessage("Are you sure you want to remove all the history?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            history.clear();
+                            saveHistoryToInternalStorage();
+                            Toast.makeText(getBaseContext(), "history cleared", Toast.LENGTH_SHORT).show();
+                            finish();
+                            startActivity(getIntent());
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
         }
 
         @JavascriptInterface
