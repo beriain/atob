@@ -4,5 +4,5 @@ A text only web browser for Android
 ## Screenshots
 <img src="./screenshots.png"><br>
 
-## Dependecies
+## Dependencies
 atob depends on <a href="https://jsoup.org/">Jsoup</a>
