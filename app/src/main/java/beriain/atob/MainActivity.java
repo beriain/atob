@@ -406,7 +406,9 @@ public class MainActivity extends AppCompatActivity {
 
 	private class myWebViewClient extends WebViewClient {
 		public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			Loader l = new Loader();
+		Snackbar.make(getWindow().getDecorView().getRootView(), R.string.loading, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
+		Loader l = new Loader();
         	l.url = url;
         	l.execute();
 			return true;
@@ -465,6 +467,8 @@ public class MainActivity extends AppCompatActivity {
 
         @JavascriptInterface
         public void loadFromHistory(String u) {
+		Snackbar.make(getWindow().getDecorView().getRootView(), R.string.loading, Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
             Loader l = new Loader();
             l.url = u;
             l.execute();
