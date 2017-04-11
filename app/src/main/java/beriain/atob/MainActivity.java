@@ -56,8 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
 	JavaScriptInterface jsInterface = new JavaScriptInterface();
 
-    boolean addToHistory = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -393,9 +391,7 @@ public class MainActivity extends AppCompatActivity {
                         content + "</body></html>";
             }
             wv.loadDataWithBaseURL("", content, "text/html", "utf-8", "");
-            if(addToHistory)
-                history.add(new historyEntry(title, url, new Date()));
-            addToHistory = true;
+            history.add(new historyEntry(title, url, new Date()));
             saveHistoryToInternalStorage();
         }
 
@@ -472,7 +468,6 @@ public class MainActivity extends AppCompatActivity {
             Loader l = new Loader();
             l.url = u;
             l.execute();
-            addToHistory = false;
         }
 
         @JavascriptInterface
